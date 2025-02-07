@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 import authRouter from "./routes/auth.route.js"
+// import {sendTestEmail} from "./config/nodemailer.js";
 
 //custom imports
 import connectDb from "./database.js";
@@ -28,4 +29,6 @@ app.get("/", (req, res)=>{
 
 // Starting server here
 app.listen(PORT, ()=> console.log(`server started at: ${PORT}`));
+
 await connectDb();
+// await sendTestEmail();

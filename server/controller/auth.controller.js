@@ -1,6 +1,7 @@
 import userModel from '../model/user.model.js'
 import bcrypt from "bcryptjs";
 import jsonwebtoken from 'jsonwebtoken'
+import transporter from "../config/nodemailer.js";
 
 
 export const register = async (req, res) => {
@@ -16,6 +17,7 @@ export const register = async (req, res) => {
     try {
 
         const existingUser = await userModel.findOne({email});
+
         if (existingUser) return res.json({success: false, message: "User already exist"});
 
         const hashPassword = await bcrypt.hash(password, 10);
@@ -35,12 +37,29 @@ export const register = async (req, res) => {
 
         });
 
-        res.cookie(token, token, {
+        res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "node" : "strict",
             maxAge: 7 * 24 * 60 * 1000
         })
+
+        //sending welcome email to user
+
+        const mailerOption = {
+            from: process.env.SENDER_EMAIL,
+            to:createUser.email,
+            subject:"Welcome to CoderBoyz.com",
+            text:`Welcome to CoderBoyz.com website. Your account has been created with this email: ${createUser.email}`
+        }
+
+        try {
+            await transporter.sendMail(mailerOption);
+            console.log("Welcome email sent successfully");
+        } catch (emailError) {
+            console.error("Error sending email:", emailError.message);
+            return res.json({ success: false, message: "Error sending welcome email" });
+        }
 
         return res.json({success: true, message: "User created successful", createUser});
 
@@ -76,7 +95,7 @@ export const login = async (req, res) => {
             expiresIn: "7d",
 
         });
-        res.cookie(token, token, {
+        res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "node" : "strict",
