@@ -61,7 +61,7 @@ export const register = async (req, res) => {
             return res.json({success: false, message: "Error sending welcome email"});
         }
 
-        return res.json({success: true, message: "User created successful", createUser});
+        return res.json({success: true, message: "User created successful"});
 
 
     } catch (errors) {
@@ -102,7 +102,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 1000
         });
 
-        return res.json({success: true, message: "User login successful", findUser});
+        return res.json({success: true, message: "User login successful"});
 
 
     } catch (errors) {

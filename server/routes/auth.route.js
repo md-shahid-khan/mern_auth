@@ -20,7 +20,7 @@ router.post("/get-otp", userAuth, sendingVerifyOtp);
 router.post("/verify-otp", userAuth, verifyEmail);
 router.get("/is-auth", userAuth, isAuthenticated);
 router.post("/reset-otp", userAuth, resetOtp);
-router.post("/verify-reset-otp", userAuth, verifyRestOtp);
+router.post("/reset-password", userAuth, verifyRestOtp);
 
 
 export default router;
