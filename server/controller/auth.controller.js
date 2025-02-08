@@ -198,3 +198,86 @@ export const verifyEmail = async (req, res) => {
 
 
 }
+
+export const isAuthenticated = async (req, res) => {
+
+    try {
+        return res.json({success: true, message: "Authenticated"});
+
+    } catch (error) {
+        return res.json({success: false, message: "Internal Server error"});
+    }
+
+}
+
+export const resetOtp = async (req, res) => {
+    const {email} = req.body;
+    if (!email) return res.json({success: false, message: "Check your email"});
+    try {
+        const user = await userModel.findOne({email});
+        if (!user) return res.json({success: false, message: "No Account Found! with this email"});
+        const resetOtp = String(Math.floor(100000 + Math.random() * 900000));
+        user.resetOtp = resetOtp;
+        user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000;
+        await user.save();
+
+        const mailerOption = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: "Reset password OTP ",
+            text: `Welcome to CoderBoyz.com website. Your password reset email verification OTP is ${resetOtp} verify your email with this otp`
+        }
+
+        try {
+            await transporter.sendMail(mailerOption);
+            console.log("OTP send successful");
+        } catch (emailError) {
+            console.error("Error sending OTP in email:", emailError.message);
+            return res.json({success: false, message: "Error sending OTP email"});
+        }
+
+        return res.json({success: true, message: "Rest Otp send successful to your email"});
+
+    } catch (error) {
+        return res.json({success: false, message: "Internal Server error"});
+    }
+}
+
+export const verifyRestOtp = async (req, res) => {
+    const {userId, userOtp, password} = req.body;
+
+    if (!userId || !userOtp || !password) return res.json({success: false, message: "Invalid OTP"});
+
+
+    try {
+
+        const findUser = await userModel.findById(userId);
+        if (!findUser) return res.json({success: false, message: "No UserFound!"});
+
+        // i dont have to check whether the user is activated or not
+        // if (findUser.isAccountVerified) return res.json({success: false, message: "Already verified!"});
+
+        if (findUser.resetOtp === userOtp) {
+            if (findUser.resetOtpExpireAt < Date.now()) return res.json({
+                success: false,
+                message: "Otp is expired request for new!"
+            });
+            // findUser.isAccountVerified = true;
+            const hashPassword = bcrypt.hash(password, 10);
+            findUser.password = await hashPassword;
+            findUser.resetOtp = "";
+            findUser.resetOtpExpireAt = 0;
+            await findUser.save();
+
+        } else {
+            return res.json({success: false, message: "Invalid otp try again"});
+        }
+
+        return res.json({success: true, message: "OTP verified success"});
+
+    } catch (errors) {
+        return res.json({success: false, message: errors.message, type: "Internal Server Error"});
+    }
+
+
+}
