@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+*{
+    font-family: "Outfit", serif;
+    box-sizing: border-box;
+    margin: -0px;
+    padding: 0;
+}
+
+.my-nav{
+    padding: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    /*border: 1px solid #6a7282;*/
+    gap: 2rem;
+}
+.btn{
+    padding-left: 32px;
+    padding-top: 32px;
+}
+
+@media (max-width: 640px) {
+    .my-nav{
+        padding: 112px;
+        padding: 0 122px;
+
+    }
+}
